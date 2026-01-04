@@ -2,7 +2,7 @@ import { Redirect } from 'expo-router';
 import React from 'react';
 
 const index = () => {
-    const isAuthenticated = false;
+    const isAuthenticated = true;
     if (!isAuthenticated) {
         return <Redirect href="/(auth)/login" />;
     }

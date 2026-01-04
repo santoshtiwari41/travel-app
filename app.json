@@ -23,7 +23,7 @@
     },
     "web": {
       "output": "static",
-       "bundler": "metro",
+      "bundler": "metro",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -39,7 +39,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

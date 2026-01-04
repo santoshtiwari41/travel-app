@@ -1,12 +1,14 @@
 import React from 'react'
 import { Text, View } from 'react-native'
+import ThemeToggle from '@/components/theme-toggle'
 
-const home = () => {
+const Home = () => {
   return (
-    <View>
-      <Text>home</Text>
+    <View className="flex-1 items-center justify-center bg-white dark:bg-black">
+      <ThemeToggle />
+      <Text className="mt-4 text-black dark:text-white">home</Text>
     </View>
   )
 }
 
-export default home
+export default Home
