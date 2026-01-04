@@ -4,7 +4,7 @@ import { Text, View } from 'react-native'
 const login = () => {
   return (
     <View>
-      <Text>login</Text>
+      <Text className='bg-red-500'>login</Text>
     </View>
   )
 }
