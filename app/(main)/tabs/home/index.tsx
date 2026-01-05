@@ -1,3 +1,5 @@
+
+import React from 'react'
 import { Text, View } from 'react-native'
 import ThemeToggle from '@/components/theme-toggle'
 

@@ -6,9 +6,6 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import '../global.css'
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -27,8 +24,8 @@ function ThemeConsumerLayout({ systemScheme }: { systemScheme: 'light' | 'dark' 
     <ThemeProvider value={theme === 'dark' ? DarkTheme : DefaultTheme}>
       <View className={theme === 'dark' ? 'dark flex-1' : 'flex-1'} style={{ flex: 1 }}>
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(main)" />
         </Stack>
         <StatusBar style="auto" />
       </View>
