@@ -1,9 +1,8 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { View } from 'react-native';
+import { StatusBar, View } from 'react-native';
 import { ThemeProvider as AppThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import '../global.css'
 
@@ -22,12 +21,18 @@ function ThemeConsumerLayout({ systemScheme }: { systemScheme: 'light' | 'dark' 
 
   return (
     <ThemeProvider value={theme === 'dark' ? DarkTheme : DefaultTheme}>
+        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      
       <View className={theme === 'dark' ? 'dark flex-1' : 'flex-1'} style={{ flex: 1 }}>
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack screenOptions={{
+          headerShown: false,
+          animation: 'fade',
+        }}>
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(main)" />
         </Stack>
-        <StatusBar style="auto" />
+
+
       </View>
     </ThemeProvider>
   );
