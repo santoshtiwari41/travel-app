@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, ImageBackground, StatusBar } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, ImageBackground, StatusBar, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather, AntDesign } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
+  const router=useRouter()
   return (
     <SafeAreaView className="flex-1 bg-white">
   <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
@@ -11,10 +13,14 @@ export default function HomeScreen() {
         
         {/* Header Section */}
         <View className="flex-row justify-between items-center py-4">
-          <Image 
+          <Pressable onPress={() => {router.push('/(main)/stack/profile')}}>
+            <Image 
             source={{ uri: 'https://i.pravatar.cc/150?u=user1' }} 
             className="w-12 h-12 rounded-full" 
           />
+
+          </Pressable>
+          
           <Text className="text-xl font-bold text-[#3d2c29]">Trip Planner</Text>
           <TouchableOpacity className="w-12 h-12 rounded-full border border-gray-100 items-center justify-center">
             <Feather name="search" size={20} color="#3d2c29" />

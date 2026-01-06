@@ -26,7 +26,7 @@ function ThemeConsumerLayout({ systemScheme }: { systemScheme: 'light' | 'dark' 
       <View className={theme === 'dark' ? 'dark flex-1' : 'flex-1'} style={{ flex: 1 }}>
         <Stack screenOptions={{
           headerShown: false,
-          animation: 'fade',
+           animation: 'slide_from_right',
         }}>
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(main)" />
