@@ -21,12 +21,13 @@ function ThemeConsumerLayout({ systemScheme }: { systemScheme: 'light' | 'dark' 
 
   return (
     <ThemeProvider value={theme === 'dark' ? DarkTheme : DefaultTheme}>
+      {theme === 'dark' ? <StatusBar barStyle="light-content" backgroundColor="#09090b" /> :
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      
+      }
       <View className={theme === 'dark' ? 'dark flex-1' : 'flex-1'} style={{ flex: 1 }}>
         <Stack screenOptions={{
           headerShown: false,
-           animation: 'slide_from_right',
+          animation: 'slide_from_right',
         }}>
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(main)" />
