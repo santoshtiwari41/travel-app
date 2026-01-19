@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, TextInput, KeyboardAvoidingView, Platform,
-  LayoutAnimation, UIManager, TouchableOpacity, ScrollView, useColorScheme
+  LayoutAnimation, UIManager, TouchableOpacity, ScrollView, useColorScheme,
+  ActivityIndicator
 } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+
+import {
+  useMutation,
+} from '@tanstack/react-query'
 import { AntDesign, FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import AuthImage from '@/components/AuthImage';
 import { GoogleIcon } from '@/components/google-icon';
+import { login, signUp } from '@/api/auth';
+import Toast from 'react-native-toast-message';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -15,25 +23,85 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 type AuthMode = 'WELCOME' | 'SIGN_UP' | 'LOGIN';
 
 export default function AuthScreen() {
+
   const [mode, setMode] = useState<AuthMode>('WELCOME');
   const [email, setEmail] = useState('');
-  const [fullName,setFullName]=useState('')
+  const [fullName, setFullName] = useState('')
   const [password, setPassword] = useState('');
   const colorScheme = useColorScheme();
+  const [token, setToken] = useState('')
   const isDark = colorScheme === 'dark';
   const router = useRouter();
+  useEffect(() => {
+    async function getToken() {
+      const token = await SecureStore.getItemAsync('auth-token');
+      if (token) {
+        setToken(token)
+      }
+    }
+    getToken()
+  }, [])
+  const Loginmutation = useMutation({
+    mutationFn: login,
+    onSuccess: () => {
+      Toast.show({
+      type: 'success',
+      text1: 'Welcome back!',
+      text2: 'You have logged in successfully 👋'
+    })
+      router.replace('/(main)/tabs/home')
+    },
+    onError: (error) => {
+      Toast.show({
+      type: 'error',
+      text1: 'Login Failed',
+      text2: 'Please check your credentials.'
+    })
+    }
+  })
 
+  const registermutation = useMutation({
+    mutationFn: signUp,
+    onSuccess: () => {
+      Toast.show({
+      type: 'success',
+      text1: 'Welcome!',
+      text2: 'You have registered  successfully 👋'
+    })
+      router.push('/')
+    },
+    onError: (error) => {
+    Toast.show({
+      type: 'error',
+      text1: 'Register Failed',
+      text2: 'Please check your credentials.'
+    })    }
+  })
   const transitionTo = (newMode: AuthMode) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setMode(newMode);
   };
 
   const handleSignin = () => {
-    console.log('details are ',email,password)
+    Loginmutation.mutate({
+      user: {
+        email,
+        password
+      }
+    });
   };
 
-  const handleSignUP=()=>{
-console.log('register details are ',email,password,fullName)
+  const handleSignUP = () => {
+    registermutation.mutate({
+      user: {
+        fullName,
+        email,
+        password
+      }
+    })
+  }
+  if(token){
+    return <Redirect href='/(main)/tabs/home' />
   }
   return (
     <View className={`flex-1 ${isDark ? 'bg-zinc-950' : 'bg-slate-50'}`}>
@@ -91,61 +159,65 @@ console.log('register details are ',email,password,fullName)
                 </View>
               ) : (
                 <View>
-                  {mode === 'SIGN_UP' && 
-                  
-                 <>
-                  <InputField placeholder="Full Name" icon="person-outline" 
-                  onChangeText={setFullName}
-                  />
-                   <InputField
-                    placeholder="Email Address"
-                    icon="mail-outline"
-                    onChangeText={setEmail}
-                    autoCapitalize="none"
-                  />
+                  {mode === 'SIGN_UP' &&
 
-                  <InputField
-                    placeholder="Password"
-                    icon="lock-closed-outline"
-                    secureTextEntry
-                    onChangeText={setPassword}
-                  />
-                   <View className="mt-4">
-                    <ActionButton
-                      label='Get Started'
-                      onPress={handleSignUP}
-                      primary
-                    />
-                  </View>
-                 </>
+                    <>
+                      <InputField placeholder="Full Name" icon="person-outline"
+                        onChangeText={setFullName}
+                      />
+                      <InputField
+                        placeholder="Email Address"
+                        icon="mail-outline"
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                      />
+
+                      <InputField
+                        placeholder="Password"
+                        icon="lock-closed-outline"
+                        secureTextEntry
+                        onChangeText={setPassword}
+                      />
+                      <View className="mt-4">
+                        <ActionButton
+                          label='Get Started'
+                          onPress={handleSignUP}
+                          loading={registermutation.isPending}
+                          disabled={registermutation.isPending}
+                          primary
+                        />
+                      </View>
+                    </>
 
                   }
-                   {mode === 'LOGIN' &&
-                   <>
-                    <InputField
-                    placeholder="Email Address"
-                    icon="mail-outline"
-                    onChangeText={setEmail}
-                    autoCapitalize="none"
-                  />
+                  {mode === 'LOGIN' &&
+                    <>
+                      <InputField
+                        placeholder="Email Address"
+                        icon="mail-outline"
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                      />
 
-                  <InputField
-                    placeholder="Password"
-                    icon="lock-closed-outline"
-                    secureTextEntry
-                    onChangeText={setPassword}
-                  />
+                      <InputField
+                        placeholder="Password"
+                        icon="lock-closed-outline"
+                        secureTextEntry
+                        onChangeText={setPassword}
+                      />
 
-                  <View className="mt-4">
-                    <ActionButton
-                      label='Sign IN'
-                      onPress={handleSignin}
-                      primary
-                    />
-                  </View>
-                   </>
-                   
-                   } 
+                      <View className="mt-4">
+                        <ActionButton
+                          label='Sign IN'
+                          onPress={handleSignin}
+                          primary
+                          loading={Loginmutation.isPending}
+                          disabled={Loginmutation.isPending}
+                        />
+                      </View>
+                    </>
+
+                  }
 
                 </View>
               )}
@@ -169,20 +241,26 @@ const InputField = ({ icon, ...props }: any) => (
   </View>
 );
 
-const ActionButton = ({ label, onPress, primary }: any) => {
+const ActionButton = ({ label, onPress, primary, loading, disabled }: any) => {
   const isDark = useColorScheme() === 'dark';
+
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      className={`w-full py-5 rounded-2xl shadow-md ${primary
-        ? (isDark ? 'bg-indigo-600' : 'bg-slate-900')
-        : 'bg-transparent border border-slate-200 dark:border-zinc-700'
-        }`}
+      disabled={disabled || loading} // Prevent double taps
+      className={`w-full py-5 rounded-2xl shadow-md flex-row justify-center items-center ${primary
+          ? (isDark ? 'bg-indigo-600' : 'bg-slate-900')
+          : 'bg-transparent border border-slate-200 dark:border-zinc-700'
+        } ${disabled || loading ? 'opacity-70' : 'opacity-100'}`}
     >
-      <Text className={`text-center font-bold text-lg ${primary ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
-        {label}
-      </Text>
+      {loading ? (
+        <ActivityIndicator color="white" size="small" />
+      ) : (
+        <Text className={`text-center font-bold text-lg ${primary ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+          {label}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };

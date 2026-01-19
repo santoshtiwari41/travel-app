@@ -1,18 +1,28 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { StatusBar, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { ThemeProvider as AppThemeProvider, useTheme } from '@/contexts/ThemeContext';
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
 import { Stack } from 'expo-router';
 import 'react-native-reanimated';
 import '../global.css'
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+const queryClient = new QueryClient()
 
   return (
+    <QueryClientProvider client={queryClient}>
     <AppThemeProvider>
       <ThemeConsumerLayout systemScheme={colorScheme ?? null} />
+      <Toast />
     </AppThemeProvider>
+     </QueryClientProvider>
+
   );
 }
 
