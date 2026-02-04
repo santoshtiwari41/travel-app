@@ -11,6 +11,7 @@ import { Stack } from 'expo-router';
 import 'react-native-reanimated';
 import '../global.css'
 
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 const queryClient = new QueryClient()
@@ -42,7 +43,6 @@ function ThemeConsumerLayout({ systemScheme }: { systemScheme: 'light' | 'dark' 
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(main)" />
         </Stack>
-
 
       </View>
     </ThemeProvider>

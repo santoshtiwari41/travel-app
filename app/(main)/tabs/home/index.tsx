@@ -4,17 +4,29 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
+const CATEGORIES = [
+  { id: '1', icon: 'map', label: 'Places', route: '/(main)/tabs/home' },
+  { id: '2', icon: 'airplane', label: 'Flights', route: '/(main)/stack/flights' },
+  { id: '3', icon: 'bed', label: 'Hotels', route: '/(main)/stack/hotels' },
+  { id: '4', icon: 'food', label: 'Eats', route: '/(main)/stack/foods' },
+  { id: '5', icon: 'car', label: 'Rentals', route: '/(main)/stack/rentals' },
+  { id: '6', icon: 'camera', label: 'Tours', route: '/(main)/stack/tours' },
+];
+
 export default function HomeScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-
+  const handleSearch=()=>{
+    router.push('/(main)/stack/explore');
+  }
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-zinc-950' : 'bg-slate-50'}`}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1 px-5">
         
+        {/* Header Section */}
         <View className="flex-row justify-between items-center py-6">
           <View className="flex-row items-center">
             <Pressable 
@@ -34,11 +46,12 @@ export default function HomeScreen() {
             </View>
           </View>
           
-          <TouchableOpacity className="w-12 h-12 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 items-center justify-center shadow-sm">
+          <TouchableOpacity onPress={handleSearch}className="w-12 h-12 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 items-center justify-center shadow-sm">
             <Feather name="search" size={20} color={isDark ? "#fff" : "#3d2c29"} />
           </TouchableOpacity>
         </View>
 
+        {/* Featured Card */}
         <View className="mt-2 shadow-xl shadow-indigo-500/20">
           <ImageBackground
             source={{ uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1000' }}
@@ -63,13 +76,25 @@ export default function HomeScreen() {
           </ImageBackground>
         </View>
 
-        <View className="flex-row justify-between mt-8">
-            <CategoryItem icon="map" label="Places" active />
-            <CategoryItem icon="airplane" label="Flights" />
-            <CategoryItem icon="bed" label="Hotels" />
-            <CategoryItem icon="food" label="Eats" />
+        <View className="mt-8">
+            <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingRight: 20 }}
+            >
+                {CATEGORIES.map((item) => (
+                    <CategoryItem 
+                        key={item.id}
+                        icon={item.icon} 
+                        label={item.label} 
+                        active={item.label === 'Places'} 
+                        onPress={() => router.push(item.route)}
+                    />
+                ))}
+            </ScrollView>
         </View>
 
+        {/* Popular Destinations */}
         <View className="flex-row justify-between items-center mt-10 mb-5">
           <Text className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Popular destinations</Text>
           <TouchableOpacity className="bg-slate-100 dark:bg-zinc-900 px-3 py-1.5 rounded-full">
@@ -104,20 +129,22 @@ export default function HomeScreen() {
   );
 }
 
-const CategoryItem = ({ icon, label, active = false }: any) => {
+const CategoryItem = ({ icon, label, active = false, onPress }: any) => {
     const isDark = useColorScheme() === 'dark';
     return (
-        <View className="items-center">
+        <View className="items-center mr-6">
             <TouchableOpacity 
-                className={`w-14 h-14 rounded-2xl items-center justify-center border shadow-sm ${
+                onPress={onPress}
+                activeOpacity={0.7}
+                className={`w-16 h-16 rounded-2xl items-center justify-center border shadow-sm ${
                     active 
                     ? 'bg-indigo-600 border-indigo-400' 
                     : 'bg-white dark:bg-zinc-900 border-slate-100 dark:border-zinc-800'
                 }`}
             >
                 <MaterialCommunityIcons 
-                    name={icon} 
-                    size={24} 
+                    name={icon as any} 
+                    size={26} 
                     color={active ? 'white' : (isDark ? '#71717a' : '#475569')} 
                 />
             </TouchableOpacity>

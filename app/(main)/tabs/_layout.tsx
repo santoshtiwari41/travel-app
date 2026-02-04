@@ -1,33 +1,53 @@
 import { Tabs } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Colors } from '@/constants/theme';
+import { useColorScheme, View, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme() ?? 'light';
   const insets = useSafeAreaInsets();
-  const extraGap = 1; 
+  const isDark = colorScheme === 'dark';
+
+  const safePaddingBottom = Platform.OS === 'ios' 
+    ? Math.max(insets.bottom, 20) 
+    : (insets.bottom > 0 ? insets.bottom + 10 : 25);
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors[colorScheme].tabIconSelected,
-        tabBarInactiveTintColor: Colors[colorScheme].tabIconDefault,
+        tabBarActiveTintColor: isDark ? '#818cf8' : '#0f172a',
+        tabBarInactiveTintColor: isDark ? '#52525b' : '#94a3b8',
+        tabBarShowLabel: true,
         tabBarStyle: {
-          height: 60 + insets.bottom + extraGap,
-          paddingBottom: insets.bottom + extraGap,
-          paddingTop: 8,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          
+          height: Platform.OS === 'ios' ? 92 : 108, 
+          backgroundColor: isDark ? '#18181b' : '#ffffff',
+          
           borderTopWidth: 1,
-          borderTopColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+          borderLeftWidth: 0,
+          borderRightWidth: 0,
+          borderBottomWidth: 0,
+          borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+          
           elevation: 0,
           shadowOpacity: 0,
-          backgroundColor: Colors[colorScheme].background,
+
+          paddingBottom: safePaddingBottom,
+          paddingTop: 4,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
+          fontWeight: '600',
+          marginTop: 4,
+          marginBottom: 0, 
+        },
+        tabBarIconStyle: {
+          marginTop: 0,
         },
       }}
     >
@@ -35,30 +55,53 @@ export default function TabLayout() {
         name="home/index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <Feather name="home" size={24} color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="home" color={color} focused={focused} />
+          ),
         }}
       />
       <Tabs.Screen
         name="trips/index"
         options={{
-          title: 'My trips',
-          tabBarIcon: ({ color }) => <Feather name="map" size={24} color={color} />,
+          title: 'Trips',
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="map" color={color} focused={focused} />
+          ),
         }}
       />
       <Tabs.Screen
         name="favorites/index"
         options={{
-          title: 'Favorites',
-          tabBarIcon: ({ color }) => <Feather name="heart" size={24} color={color} />,
+          title: 'Saved',
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="heart" color={color} focused={focused} />
+          ),
         }}
       />
       <Tabs.Screen
         name="community/index"
         options={{
-          title: 'Community',
-          tabBarIcon: ({ color }) => <Feather name="users" size={24} color={color} />,
+          title: 'Social',
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="users" color={color} focused={focused} />
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const TabIcon = ({ name, color, focused }: { name: any, color: string, focused: boolean }) => {
+  return (
+    <View style={{
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 48,
+      height: 38, 
+      borderRadius: 10,
+      backgroundColor: focused ? (color + '15') : 'transparent',
+    }}>
+      <Feather name={name} size={28} color={color} />
+    </View>
+  );
+};

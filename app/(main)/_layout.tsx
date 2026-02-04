@@ -9,6 +9,9 @@ export default function MainLayout() {
           headerShown: false,
           animation: 'slide_from_right',
         }}
-      />
+      >
+        <Stack.Screen name="tabs" />
+        <Stack.Screen name="stack" />
+      </Stack>
   );
 }
