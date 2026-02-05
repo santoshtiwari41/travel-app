@@ -70,11 +70,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="favorites/index"
+        name="notifications/index"
         options={{
-          title: 'Saved',
+          title: 'NOtification',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="heart" color={color} focused={focused} />
+            <TabIcon name="bell" color={color} focused={focused} />
           ),
         }}
       />
