@@ -37,6 +37,7 @@ const Profile = () => {
           <Text className="text-slate-500 dark:text-zinc-400">alex.rivers@design.com</Text>
         </View>
 
+
         <View className="gap-4">
           <ProfileItem 
             icon={<User size={20} color="#6366f1" />} 
