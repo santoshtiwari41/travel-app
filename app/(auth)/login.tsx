@@ -5,7 +5,7 @@ import {
   ActivityIndicator
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-
+import { getPushToken } from '@/services/asyncStorage';
 import {
   useMutation,
 } from '@tanstack/react-query'
@@ -15,10 +15,12 @@ import AuthImage from '@/components/AuthImage';
 import { GoogleIcon } from '@/components/google-icon';
 import { login, signUp } from '@/api/auth';
 import Toast from 'react-native-toast-message';
+import { useGoogleAuth } from '@/hooks/google-auth';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
 
 type AuthMode = 'WELCOME' | 'SIGN_UP' | 'LOGIN';
 
@@ -45,37 +47,41 @@ export default function AuthScreen() {
     mutationFn: login,
     onSuccess: () => {
       Toast.show({
-      type: 'success',
-      text1: 'Welcome back!',
-      text2: 'You have logged in successfully 👋'
-    })
+        type: 'success',
+        text1: 'Welcome back!',
+        text2: 'You have logged in successfully 👋'
+      })
       router.replace('/(main)/tabs/home')
     },
     onError: (error) => {
       Toast.show({
-      type: 'error',
-      text1: 'Login Failed',
-      text2: 'Please check your credentials.'
-    })
+        type: 'error',
+        text1: 'Login Failed',
+        text2: 'Please check your credentials.'
+      })
     }
   })
 
   const registermutation = useMutation({
     mutationFn: signUp,
-    onSuccess: () => {
+    onSuccess: (data) => {
       Toast.show({
-      type: 'success',
-      text1: 'Welcome!',
-      text2: 'You have registered  successfully 👋'
-    })
-      router.push('/')
+        type: 'success',
+        text1: 'Welcome!',
+        text2: 'You have registered  successfully 👋'
+      })
+     router.push({
+      pathname: '/(auth)/verify',
+      params: { sessionToken: data.sessionToken } 
+    });
     },
     onError: (error) => {
-    Toast.show({
-      type: 'error',
-      text1: 'Register Failed',
-      text2: 'Please check your credentials.'
-    })    }
+      Toast.show({
+        type: 'error',
+        text1: 'Register Failed',
+        text2: 'Please check your credentials.'
+      })
+    }
   })
   const transitionTo = (newMode: AuthMode) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -86,21 +92,23 @@ export default function AuthScreen() {
     Loginmutation.mutate({
       user: {
         email,
-        password
+        password,
       }
     });
   };
 
-  const handleSignUP = () => {
+  const handleSignUP = async () => {
+    const expoPushToken = (await getPushToken()) ?? undefined;
     registermutation.mutate({
       user: {
         fullName,
         email,
-        password
+        password,
+        expoPushToken,
       }
     })
   }
-  if(token){
+  if (token) {
     return <Redirect href='/(main)/tabs/home' />
   }
   return (
@@ -250,8 +258,8 @@ const ActionButton = ({ label, onPress, primary, loading, disabled }: any) => {
       activeOpacity={0.8}
       disabled={disabled || loading} // Prevent double taps
       className={`w-full py-5 rounded-2xl shadow-md flex-row justify-center items-center ${primary
-          ? (isDark ? 'bg-indigo-600' : 'bg-slate-900')
-          : 'bg-transparent border border-slate-200 dark:border-zinc-700'
+        ? (isDark ? 'bg-indigo-600' : 'bg-slate-900')
+        : 'bg-transparent border border-slate-200 dark:border-zinc-700'
         } ${disabled || loading ? 'opacity-70' : 'opacity-100'}`}
     >
       {loading ? (
@@ -265,24 +273,32 @@ const ActionButton = ({ label, onPress, primary, loading, disabled }: any) => {
   );
 };
 
-const SocialSection = ({ label = "Sign up with" }: { label?: string }) => (
-  <View className="w-full">
-    <View className="flex-row items-center mb-6">
-      <View className="flex-1 h-[1px] bg-slate-200 dark:bg-zinc-800" />
-      <Text className="mx-4 text-slate-400 font-medium">{label}</Text>
-      <View className="flex-1 h-[1px] bg-slate-200 dark:bg-zinc-800" />
-    </View>
-    <View className="flex-row justify-center gap-6">
-      <SocialIcon icon={<GoogleIcon size={24} />} /><SocialIcon
-        icon={<FontAwesome5 name="facebook" size={24} color="#1877F2" />}
-      />
-      <SocialIcon icon={<AntDesign name="apple" size={24} color={useColorScheme() === 'dark' ? 'white' : 'black'} />} />
-    </View>
-  </View>
-);
+const SocialSection = ({ label = "Sign up with" }: { label?: string }) => {
+ const { signInWithGoogle, isLoading: googleLoading } = useGoogleAuth();
+  
+  return (
+    <View className="w-full">
+      <View className="flex-row items-center mb-6">
+        <View className="flex-1 h-[1px] bg-slate-200 dark:bg-zinc-800" />
+        <Text className="mx-4 text-slate-400 font-medium">{label}</Text>
+        <View className="flex-1 h-[1px] bg-slate-200 dark:bg-zinc-800" />
+      </View>
+      <View className="flex-row justify-center gap-6">
+        <SocialIcon onPress={async () => {
+          signInWithGoogle()
+        }} icon={<GoogleIcon size={24} />} />
+        <SocialIcon
 
-const SocialIcon = ({ icon }: any) => (
-  <TouchableOpacity className="w-16 h-14 rounded-2xl border border-slate-200 dark:border-zinc-700 items-center justify-center bg-white/50 dark:bg-zinc-800/50 shadow-sm">
+          icon={<FontAwesome5 name="facebook" size={24} color="#1877F2" />}
+        />
+        <SocialIcon icon={<AntDesign name="apple" size={24} color={useColorScheme() === 'dark' ? 'white' : 'black'} />} />
+      </View>
+    </View>
+  )
+};
+
+const SocialIcon = ({ icon, onPress }: any) => (
+  <TouchableOpacity onPress={onPress} className="w-16 h-14 rounded-2xl border border-slate-200 dark:border-zinc-700 items-center justify-center bg-white/50 dark:bg-zinc-800/50 shadow-sm">
     {icon}
   </TouchableOpacity>
 );
